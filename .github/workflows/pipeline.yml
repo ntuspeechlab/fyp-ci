@@ -29,7 +29,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v2
       with:
-        images: ghcr.io/fyp-ci
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         tags: |
           type=ref,event=branch
           type=ref,event=pr
@@ -41,5 +41,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: kaikiat/${{ steps.meta.outputs.tags }}
+        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
