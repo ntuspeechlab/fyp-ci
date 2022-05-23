@@ -1,0 +1,8 @@
+# Created by .ignore support plugin (hsz.mobi)
+models/*
+Terraform_azure/.terraform
+Terraform_azure/.terraform.lock.hcl
+Terraform_google/.terraform
+Terraform_google/.terraform.lock.hcl
+Terraform_aws/.terraform.lock.hcl
+Terraform_aws/.terraform
