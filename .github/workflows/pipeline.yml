@@ -20,7 +20,7 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag fyp-ci:$(date +%s)
     - name: Log in to the Container registry
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
@@ -40,6 +40,6 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         context: .
-        push: true
+        push: docker push ghcr.io/kaikiat/fyp-ci:latest
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
