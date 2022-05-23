@@ -41,5 +41,5 @@ jobs:
       with:
         context: .
         push: true
-        tags: /kaikiat/${{ steps.meta.outputs.tags }}
+        tags: kaikiat/${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
