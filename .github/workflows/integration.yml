@@ -1,4 +1,4 @@
-name: ntu-asr-integration-pipeline
+name: integration-pipeline
 on:
   push:
     branches: [ main ]
