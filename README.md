@@ -1,0 +1,1 @@
+pylint -ignore-missing-imports --show-error-codes --rcfile=/Users/kaikiat/ntu/fyp-ci/.pylintrc -v -w 100

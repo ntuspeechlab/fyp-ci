@@ -1,4 +1,4 @@
-name: ntu-asr-ci-pipeline
+name: ntu-asr-image-pipeline
 on:
   push:
     branches: [ main ]

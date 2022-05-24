@@ -1,0 +1,21 @@
+name: ntu-asr-integretion-pipeline
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+     steps:
+    - uses: actions/checkout@v2  
+    - name: Python Linter
+      uses: sunnysid3up/python-linter@master
+      with:
+        source: .
+        strict: medium
+        mypy-options: "--ignore-missing-imports --show-error-codes"
+        pylint-options: "--rcfile=.pylintrc"
+        isort-options: "-w 100"
