@@ -24,7 +24,7 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --fail_under=7
+        pylint $(git ls-files '*.py') --fail-under=7
     - name: Create pull request for fyp-cd
       run: |
         echo 'Hello World'
