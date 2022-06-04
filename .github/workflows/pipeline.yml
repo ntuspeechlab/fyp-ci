@@ -45,7 +45,7 @@ jobs:
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
-      # run: echo "::set-output name=bar-output::$(echo 1)"
+      run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTags }}"
     outputs:
       new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
@@ -62,8 +62,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Output step 2 
-      run: |
-        echo ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
+      env:
+        NEW_TAG_ENV: ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
+      run: echo "$NEW_TAG_ENV"
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
