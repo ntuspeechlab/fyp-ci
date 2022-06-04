@@ -2,8 +2,8 @@ name: ci-pipeline
 on:
   push:
     branches: [ main ]
-    tags:
-      - 'v*'
+    # tags:
+    #   - 'v*'
   pull_request:
       branches: [ main ]
 env:
@@ -43,25 +43,40 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v2
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha
+    - name: Automated Version Bump
+      id: version-bump
+      uses: 'phips28/gh-action-bump-version@master'
+      env:
+        GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+    - name: Output Step                             
+      env:
+        NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
+      run: echo "new tag $NEW_TAG"
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         context: .
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        # tags: 2.5
-        labels: ${{ steps.meta.outputs.labels }}
+        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
+        # labels: ${{ steps.meta.outputs.labels }}
+    # - name: Extract metadata (tags, labels) for Docker
+    #   id: meta
+    #   uses: docker/metadata-action@v2
+    #   with:
+    #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    #     tags: |
+    #       type=ref,event=branch
+    #       type=ref,event=pr
+    #       type=semver,pattern={{version}}
+    #       type=semver,pattern={{major}}.{{minor}}
+    #       type=sha
+    # - name: Build and push Docker image
+    #   uses: docker/build-push-action@v3
+    #   with:
+    #     context: .
+    #     push: true
+    #     tags: ${{ steps.meta.outputs.tags }}
+    #     labels: ${{ steps.meta.outputs.labels }}
   pr:
     name: Pull Request
     runs-on: ubuntu-latest
