@@ -48,6 +48,11 @@ jobs:
       uses: 'phips28/gh-action-bump-version@master'
       env:
         GITHUB_TOKEN: ${{ secrets.CR_PAT }}
+      with:
+        major-wording:  'major'
+        minor-wording:  'feat,add,added'
+        patch-wording:  'patch,fix,update' 
+        rc-wording:     'RELEASE,alpha'
     - name: Output Step                             
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
