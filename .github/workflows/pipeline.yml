@@ -48,9 +48,11 @@ jobs:
         rc-wording:     'release,alpha'
     - name: Set tag ouput  
       id: set-output 
+      env:
+        NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       run: | 
         echo "the new tag is new tag ${{ steps.version-bump.outputs.newTag }}"
-        echo "::set-output name=updatedTag::${{ steps.version-bump.outputs.newTags }}"
+        echo "::set-output name=updatedTag::$NEW_TAG"
     # outputs:
     #   new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
