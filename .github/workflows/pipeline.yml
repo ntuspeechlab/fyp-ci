@@ -45,7 +45,8 @@ jobs:
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
-      run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTags }}"
+    - name: Set tag ouput   
+    run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTags }}"
     outputs:
       new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
