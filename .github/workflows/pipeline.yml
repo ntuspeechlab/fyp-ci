@@ -45,8 +45,9 @@ jobs:
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
+      # run: echo "::set-output name=bar-output::$(echo 1)"
     outputs:
-      tag: ${{ steps.version-bump.outputs.newTags }}
+      new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
     #   run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTag }}""
                    
@@ -62,14 +63,14 @@ jobs:
     - uses: actions/checkout@v3
     - name: Output step 2 
       run: |
-        echo ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.tag }}
+        echo ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
         context: .
         push: true
         # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
-        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.tag }}
+        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
 
         # labels: ${{ steps.meta.outputs.labels }}
     # - name: Extract metadata (tags, labels) for Docker
