@@ -24,6 +24,8 @@ jobs:
     name: Build Image
     needs: lint
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version-bump.outputs.newTags }}
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
@@ -61,7 +63,7 @@ jobs:
         context: .
         push: true
         # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
-        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.steps.version-bump.outputs.newTag }}
+        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.tag }}
 
         # labels: ${{ steps.meta.outputs.labels }}
     # - name: Extract metadata (tags, labels) for Docker
