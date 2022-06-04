@@ -41,7 +41,8 @@ jobs:
       id: version-bump
       uses: 'phips28/gh-action-bump-version@master'
       env:
-        GITHUB_TOKEN: ${{ secrets.gh_token }}
+        GITHUB_TOKEN: ${{ github.repository }}
+        repository: git@github.com:kaikiat/fyp-ci.git
       with:
         major-wording:  'major'
         minor-wording:  'feat,add,added'
