@@ -3,7 +3,7 @@
   "version": "0.0.0",                                               
   "repository": {
     "type": "git",                                                  
-    "url": "https://github.com/kaikiat/fyp-ci.git"  
-  }, 
+    "url": "git@github.com:kaikiat/fyp-ci.git"  
+  },  
   "homepage": "https://github.com/kaikiat/fyp-ci#readme"
 }
