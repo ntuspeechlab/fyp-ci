@@ -1,5 +1,4 @@
 from flask import Flask
-from pylint.utils import utils
 app = Flask(__name__)
 
 @app.route('/')

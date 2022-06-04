@@ -1,4 +1,4 @@
-name: image-pipeline
+name: ci-pipeline
 on:
   push:
     branches: [ main ]
@@ -25,7 +25,7 @@ jobs:
         pip install pylint  
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --fail-under=7
+        pylint $(git ls-files '*.py') --fail-under=7 --disable=all
   build:
     name: Build
     needs: lint
