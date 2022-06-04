@@ -2,8 +2,6 @@ name: ci-pipeline
 on:
   push:
     branches: [ main ]
-    # tags:
-    #   - 'v*'
   pull_request:
       branches: [ main ]
 env:
@@ -52,7 +50,7 @@ jobs:
         major-wording:  'major'
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
-        rc-wording:     'RELEASE,alpha'
+        rc-wording:     'release,alpha'
     - name: Output Step                             
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
