@@ -40,16 +40,17 @@ jobs:
       id: version-bump
       uses: 'phips28/gh-action-bump-version@master'
       env:
-        GITHUB_TOKEN: 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
+        # GITHUB_TOKEN: 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
+        GITHUB_TOKEN: ${{ secrets.CR_PAT }}
       with:
         major-wording:  'major'
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
-    # - name: Output Step                             
-    #   env:
-    #     NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
-    #   run: echo "new tag $NEW_TAG"
+    - name: Output Step 1                            
+      # env:
+      #   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
+      run: echo "new tag ${{ steps.version-bump.outputs.newTag }}"
 
   push:
     name: Pushing image to registry
@@ -57,6 +58,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Output step 2 
+      run: |
+        echo ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.tag }}
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
