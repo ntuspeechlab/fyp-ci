@@ -25,8 +25,8 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read|write
+      packages: write|write
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
@@ -41,8 +41,7 @@ jobs:
       id: version-bump
       uses: 'phips28/gh-action-bump-version@master'
       env:
-        GITHUB_TOKEN: ${{ secrets.CR_PAT }}
-        repository: git@github.com:kaikiat/fyp-ci.git
+        GITHUB_TOKEN: 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
       with:
         major-wording:  'major'
         minor-wording:  'feat,add,added'
@@ -58,6 +57,7 @@ jobs:
         context: .
         push: true
         tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
+
         # labels: ${{ steps.meta.outputs.labels }}
     # - name: Extract metadata (tags, labels) for Docker
     #   id: meta
