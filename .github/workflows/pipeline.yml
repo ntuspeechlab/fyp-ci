@@ -24,9 +24,6 @@ jobs:
     name: Build Image
     needs: lint
     runs-on: ubuntu-latest
-    # permissions:
-      # contents: read-all|write-all
-      # packages: write
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
@@ -47,10 +44,10 @@ jobs:
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
-    - name: Output Step                             
-      env:
-        NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
-      run: echo "new tag $NEW_TAG"
+    # - name: Output Step                             
+    #   env:
+    #     NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
+    #   run: echo "new tag $NEW_TAG"
 
   push:
     name: Pushing image to registry
@@ -63,7 +60,8 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
+        # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
+        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.steps.version-bump.outputs.newTag }}
 
         # labels: ${{ steps.meta.outputs.labels }}
     # - name: Extract metadata (tags, labels) for Docker
