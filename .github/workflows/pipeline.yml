@@ -21,11 +21,10 @@ jobs:
       run: |
         pylint $(git ls-files '*.py') --fail-under=7 --disable=all
   build:
-    name: Build Image
+    name: Build image
     needs: lint
     runs-on: ubuntu-latest
-    outputs:
-      tag: ${{ steps.version-bump.outputs.newTags }}
+  
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
@@ -40,17 +39,20 @@ jobs:
       id: version-bump
       uses: 'phips28/gh-action-bump-version@master'
       env:
-        # GITHUB_TOKEN: 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
         GITHUB_TOKEN: ${{ secrets.CR_PAT }}
       with:
         major-wording:  'major'
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
-    - name: Output Step 1                            
+    outputs:
+      tag: ${{ steps.version-bump.outputs.newTags }}
+    # - name: Set tag ouput       
+    #   run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTag }}""
+                   
       # env:
       #   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
-      run: echo "new tag ${{ steps.version-bump.outputs.newTag }}"
+      # run: echo "new tag ${{ steps.version-bump.outputs.newTag }}"
 
   push:
     name: Pushing image to registry
