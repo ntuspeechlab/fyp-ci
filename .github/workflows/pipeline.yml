@@ -76,26 +76,19 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}
 
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@v2
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=semver,pattern={{version}}
-          type=semver,pattern={{major}}.{{minor}}
-          type=sha
-          
-    - name: Push Docker image
-      uses: docker/build-push-action@v3
-      with:
-        context: .
-        push: true
-        # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
-        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
-        labels: ${{ steps.meta.outputs.labels }}
+    - name: Push Docker Image
+      env:
+        # CONTAINER_IMAGE: ghcr.io/${{github.repository}}/:${{ needs.build.outputs.new-tag }}
+        CONTAINER_IMAGE: ghcr.io/${{github.repository}}/:latest
+      run: |
+        docker push $CONTAINER_IMAGE
+    # - name: Push Docker image
+    #   uses: docker/build-push-action@v3
+    #   with:
+    #     context: .
+    #     push: true
+    #     # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
+    #     tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
 
 
   pr:
