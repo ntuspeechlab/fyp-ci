@@ -29,14 +29,14 @@ jobs:
       new-tag: ${{ steps.set-output.outputs.NEW_TAG }}
     steps:
     - uses: actions/checkout@v2
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag fyp-ci:$(date +%s)
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.CR_PAT }}
+    # - name: Build the Docker image
+    #   run: docker build . --file Dockerfile --tag fyp-ci:latest
+    # - name: Log in to the Container registry
+    #   uses: docker/login-action@v2
+    #   with:
+    #     registry: ghcr.io
+    #     username: ${{ github.repository_owner }}
+    #     password: ${{ secrets.CR_PAT }}
     - name: Automated Version Bump
       id: version-bump
       uses: 'phips28/gh-action-bump-version@master'
@@ -48,32 +48,34 @@ jobs:
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
     - name: Set tag ouput  
-      id: set-output 
+      id: Build the docker image 
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       run: | 
-        # echo "the new tag is new tag ${{ steps.version-bump.outputs.newTag }}"
         echo "::set-output name=NEW_TAG::$NEW_TAG"
+        docker build . --file Dockerfile --tag fyp-ci:latest fyp-ci:$NEW_TAG
     # outputs:
     #   new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
     #   run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTag }}""
-                   
-      # env:
-      #   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
-      # run: echo "new tag ${{ steps.version-bump.outputs.newTag }}"
-
   push:
     name: Pushing image to registry
     needs: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Output step 2 
-      env:
-        NEW_TAG_ENV: ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
-      run: echo "$NEW_TAG_ENV"
-    - name: Build and push Docker image
+    # - name: Output step 2 
+    #   env:
+    #     NEW_TAG_ENV: ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
+    #   run: echo "$NEW_TAG_ENV"
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.CR_PAT }}
+
+    - name: Push Docker image
       uses: docker/build-push-action@v3
       with:
         context: .
