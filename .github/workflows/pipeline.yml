@@ -75,14 +75,10 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.CR_PAT }}
-    # - uses: actions/checkout@v3
     - name: Push Docker Image
       env:
-        # CONTAINER_IMAGE: ghcr.io/${{github.repository}}/:${{ needs.build.outputs.new-tag }}
-        NAME: ${{github.owner}}
-        CONTAINER_IMAGE: ghcr.io/${{github.repository}}/:latest
+        CONTAINER_IMAGE: ghcr.io/${{github.repository}}:latest
       run: |
-        echo "Name : $NAME"
         echo "Container_Image: $CONTAINER_IMAGE"
         docker push $CONTAINER_IMAGE
     # - name: Push Docker image
