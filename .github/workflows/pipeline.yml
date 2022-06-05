@@ -25,7 +25,8 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     outputs:
-      new-tag: ${{ steps.set-output.outputs.updatedTag }}
+      # new-tag: ${{ steps.set-output.outputs.updatedTag }}
+      new-tag: ${{ steps.set-output.outputs.NEW_TAG }}
     steps:
     - uses: actions/checkout@v2
     - name: Build the Docker image
@@ -51,8 +52,8 @@ jobs:
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       run: | 
-        # echo "the new tag is new tag ${{ steps.version-bump.outputs.newTag }}"
-        echo "::set-output name=updatedTag::$NEW_TAG"
+        # echo "::set-output name=updatedTag::$NEW_TAG"
+        echo "::set-output name=NEW_TAG::$NEW_TAG"
     # outputs:
     #   new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
