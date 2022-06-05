@@ -82,9 +82,9 @@ jobs:
         NAME: ${{github.owner}}
         CONTAINER_IMAGE: ghcr.io/${{github.repository}}/:latest
       run: |
-        echo "$NAME"
-        echo "$CONTAINER_IMAGE"
-        docker push ${{CONTAINER_IMAGE}}
+        echo "Name : $NAME"
+        echo "Container_Image: $CONTAINER_IMAGE"
+        docker push $CONTAINER_IMAGE
     # - name: Push Docker image
     #   uses: docker/build-push-action@v3
     #   with:
