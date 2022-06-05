@@ -25,7 +25,6 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     outputs:
-      # new-tag: ${{ steps.set-output.outputs.updatedTag }}
       new-tag: ${{ steps.set-output.outputs.NEW_TAG }}
     steps:
     - uses: actions/checkout@v2
@@ -52,7 +51,6 @@ jobs:
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       run: | 
-        # echo "::set-output name=updatedTag::$NEW_TAG"
         echo "::set-output name=NEW_TAG::$NEW_TAG"
     # outputs:
     #   new-tag: ${{ steps.version-bump.outputs.newTags }}
@@ -61,6 +59,10 @@ jobs:
       # env:
       #   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       # run: echo "new tag ${{ steps.version-bump.outputs.newTag }}"
+  push:
+    name: Push image
+    needs: build
+    runs-on: ubuntu-latest
     - uses: actions/checkout@v3
     - name: Output step 2 
       env:
@@ -78,7 +80,7 @@ jobs:
   pr:
     name: Pull Request
     runs-on: ubuntu-latest
-    needs: build
+    needs: push
     steps:
     - name: Create pull request for fyp-cd
       run: |
