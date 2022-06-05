@@ -48,7 +48,7 @@ jobs:
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
     - name: Set tag ouput  
-      id: Build the docker image 
+      id: build-image 
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       run: | 
