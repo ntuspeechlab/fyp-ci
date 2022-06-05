@@ -1,3 +1,4 @@
+
 name: ci-pipeline
 on:
   push:
@@ -51,18 +52,22 @@ jobs:
       env:
         NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       run: | 
+        # echo "the new tag is new tag ${{ steps.version-bump.outputs.newTag }}"
         echo "::set-output name=NEW_TAG::$NEW_TAG"
     # outputs:
     #   new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
     #   run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTag }}""
+                   
       # env:
       #   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
       # run: echo "new tag ${{ steps.version-bump.outputs.newTag }}"
+
   push:
-    name: Push image
+    name: Pushing image to registry
     needs: build
     runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v3
     - name: Output step 2 
       env:
@@ -73,10 +78,9 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
-        # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
+        # tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ steps.version-bump.outputs.newTag }}
+        tags: ${{ env.IMAGE_NAME }}:latest, ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
 
-        # labels: ${{ steps.meta.outputs.labels }}
   pr:
     name: Pull Request
     runs-on: ubuntu-latest
@@ -85,4 +89,3 @@ jobs:
     - name: Create pull request for fyp-cd
       run: |
         echo 'Creating pull request'
-
