@@ -12,7 +12,8 @@ jobs:
   lint:
     name: Lint
     if: "!contains(github.event.commits[0].message, '[skip ci]')"
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
@@ -41,7 +42,7 @@ jobs:
         minor-wording:  'feat,add,added'
         patch-wording:  'patch,fix,update' 
         rc-wording:     'release,alpha'
-    - name: Set tag ouput  
+    - name: Building docker image  
       id: build-image 
       run: | 
         docker build . --file Dockerfile --tag fyp-ci:${{ steps.version-bump.outputs.newTag }}
@@ -61,7 +62,8 @@ jobs:
   pr:
     name: Pull Request
     if: "!contains(github.event.commits[0].message, '[skip ci]')"
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
     steps:
     - name: Create pull request for fyp-cd
