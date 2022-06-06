@@ -81,7 +81,7 @@ jobs:
         REPO_NAME: fyp-ci
       run: |
         echo "Container_Image: $CONTAINER_IMAGE"
-        dokcer image ls
+        docker image ls
         docker tag $REPO_NAME $CONTAINER_IMAGE
         docker push $CONTAINER_IMAGE
     # - name: Push Docker image
