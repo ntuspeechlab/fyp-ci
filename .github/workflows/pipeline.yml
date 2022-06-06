@@ -2,9 +2,9 @@
 name: ci-pipeline
 on:
   push:
-    branches: [ main ]
+    branches: [ staging ]
   pull_request:
-      branches: [ main ]
+      branches: [ staging ]
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
