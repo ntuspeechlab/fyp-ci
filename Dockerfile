@@ -103,6 +103,7 @@ RUN git clone https://github.com/kaldi-asr/kaldi && \
     cd /home/appuser/opt/kaldi && \
     git reset --hard $KALDI_SHA1 && \
     cd /home/appuser/opt/kaldi/tools && \
+    pwd && \
     make -j 2 && \
     ./install_portaudio.sh
 
