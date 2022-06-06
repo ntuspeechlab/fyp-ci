@@ -64,7 +64,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    # - uses: actions/checkout@v3
     - name: Output step 2 
       env:
         NEW_TAG_ENV: ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
@@ -79,8 +78,11 @@ jobs:
       env:
         # CONTAINER_IMAGE: ghcr.io/${{github.repository}}:latest
         CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ needs.build.outputs.new-tag }}
+        REPO_NAME: fyp-ci
       run: |
         echo "Container_Image: $CONTAINER_IMAGE"
+        dokcer image ls
+        docker tag $REPO_NAME $CONTAINER_IMAGE
         docker push $CONTAINER_IMAGE
     # - name: Push Docker image
     #   uses: docker/build-push-action@v3
