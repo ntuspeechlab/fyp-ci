@@ -26,7 +26,6 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     outputs:
-      # new-tag: ${{ steps.build-image.outputs.NEW_TAG }}
       new-tag: ${{ steps.version-bump.outputs.newTag }}
     steps:
     - uses: actions/checkout@v2
@@ -42,15 +41,8 @@ jobs:
         rc-wording:     'release,alpha'
     - name: Set tag ouput  
       id: build-image 
-      # env:
-      #   NEW_TAG: ${{ steps.version-bump.outputs.newTag }}
-      # run: | 
-      #   echo "::set-output name=NEW_TAG::$NEW_TAG"
-      #   docker build . --file Dockerfile --tag fyp-ci:$NEW_TAG
-
       run: | 
         docker build . --file Dockerfile --tag fyp-ci:${{ steps.version-bump.outputs.newTag }}
-
     - name: Log in to the Container registry
       uses: docker/login-action@v2
       with:
@@ -62,9 +54,6 @@ jobs:
         CONTAINER_IMAGE: fyp-ci:${{ steps.version-bump.outputs.newTag }}
         GH_CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ steps.version-bump.outputs.newTag }}
       run: |
-        # echo "Container Image: $CONTAINER_IMAGE"
-        # echo "GH Container Image: $GH_CONTAINER_IMAGE"
-        # docker image ls
         docker tag $CONTAINER_IMAGE $GH_CONTAINER_IMAGE
         docker push $GH_CONTAINER_IMAGE
   pr:
