@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       # new-tag: ${{ steps.build-image.outputs.NEW_TAG }}
-      new-tag: ${{ steps.build-image.outputs.newTag }}
+      new-tag: ${{ steps.version-bump.outputs.newTag }}
     steps:
     - uses: actions/checkout@v2
     - name: Automated Version Bump
