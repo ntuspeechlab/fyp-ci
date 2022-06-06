@@ -59,15 +59,15 @@ jobs:
     #   new-tag: ${{ steps.version-bump.outputs.newTags }}
     # - name: Set tag ouput       
     #   run: echo "::set-output name=newTags::${{ steps.version-bump.outputs.newTag }}""
-  push:
-    name: Pushing image to registry
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Output step 2 
-      env:
-        NEW_TAG_ENV: ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
-      run: echo "$NEW_TAG_ENV"
+  # push:
+    # name: Pushing image to registry
+    # needs: build
+    # runs-on: ubuntu-latest
+    # steps:
+    # - name: Output step 2 
+    #   env:
+    #     NEW_TAG_ENV: ${{ env.IMAGE_NAME }}:${{ needs.build.outputs.new-tag }}
+    #   run: echo "$NEW_TAG_ENV"
     - name: Log in to the Container registry
       uses: docker/login-action@v2
       with:
@@ -76,8 +76,8 @@ jobs:
         password: ${{ secrets.CR_PAT }}
     - name: Push Docker Image
       env:
-        # CONTAINER_IMAGE: ghcr.io/${{github.repository}}:latest
-        CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ needs.build.outputs.new-tag }}
+        # CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ needs.build.outputs.new-tag }}
+        CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ steps.outputs.newTag }}
         REPO_NAME: fyp-ci
       run: |
         echo "Container_Image: $CONTAINER_IMAGE"
