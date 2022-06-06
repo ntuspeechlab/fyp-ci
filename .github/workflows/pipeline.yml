@@ -71,4 +71,4 @@ jobs:
     - name: Create pull request for fyp-cd
       run: |
         echo 'Creating pull request'
-        echo "Version number ${{needs.build.output.new-tag}}"
+        echo "Version number: ${{needs.build.outputs.new-tag}}"
