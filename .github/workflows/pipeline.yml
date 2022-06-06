@@ -76,14 +76,15 @@ jobs:
         password: ${{ secrets.CR_PAT }}
     - name: Push Docker Image
       env:
-        # CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ needs.build.outputs.new-tag }}
-        CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ steps.version-bump.outputs.newTag }}
+        CONTAINER_IMAGE: ${{github.repository}}:${{ needs.build.outputs.new-tag }}
+        GH_CONTAINER_IMAGE: ghcr.io/${{github.repository}}:${{ steps.version-bump.outputs.newTag }}
         REPO_NAME: fyp-ci
       run: |
-        echo "Container_Image: $CONTAINER_IMAGE"
+        echo "Container Image: $CONTAINER_IMAGE"
+        echo "GH Container Image: $GH_CONTAINER_IMAGE"
         docker image ls
-        docker tag $REPO_NAME $CONTAINER_IMAGE
-        docker push $CONTAINER_IMAGE
+        docker tag $CONTAINER_IMAGE $GH_CONTAINER_IMAGE
+        docker push $GH_CONTAINER_IMAGE
     # - name: Push Docker image
     #   uses: docker/build-push-action@v3
     #   with:
