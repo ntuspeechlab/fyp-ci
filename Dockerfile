@@ -1,4 +1,6 @@
-FROM debian:10.1
+# FROM debian:10.1
+FROM ubuntu:20.04
+
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
 # set timezone
