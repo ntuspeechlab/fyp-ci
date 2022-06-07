@@ -1,5 +1,5 @@
 # FROM debian:latest
-FROM debian:10.1
+FROM debian:10.2
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
