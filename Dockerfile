@@ -1,5 +1,5 @@
-FROM debian:latest
-# FROM debian:10.1
+# FROM debian:latest
+FROM debian:10.1
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -108,9 +108,9 @@ RUN git clone https://github.com/kaldi-asr/kaldi && \
     cd /home/appuser/opt/kaldi && \
     git reset --hard $KALDI_SHA1 && \
     cd /home/appuser/opt/kaldi/tools && \
-    wget  http://www.portaudio.com/archives/pa_stable_v19_20111121.tgz
-    # make -j 2 && \
-    # ./install_portaudio.sh
+    # wget  http://www.portaudio.com/archives/pa_stable_v19_20111121.tgz
+    make -j 2 && \
+    ./install_portaudio.sh
 
 RUN cd /home/appuser/opt/kaldi/src && ./configure --shared --mathlib=ATLAS && \
     sed -i '/-g # -O0 -DKALDI_PARANOID/c\-O3 -DNDEBUG' kaldi.mk && \
