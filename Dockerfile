@@ -1,5 +1,5 @@
-# FROM debian:latest
-FROM debian:10.1
+FROM debian:latest
+# FROM debian:10.2
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -26,17 +26,17 @@ RUN apt-get update && apt-get install -y  \
     python2.7 \
     python3 \
     build-essential \
-    python-pip \
+    # python-pip \
     python3-pip \
-    python-yaml \
+    # python-yaml \
     python3-yaml \
-    python-simplejson \
+    # python-simplejson \
     python3-simplejson \ 
-    python-requests \
+    # python-requests \
     python3-requests \
-    python-pyasn1 \
+    # python-pyasn1 \
     python3-pyasn1 \
-    python-gi \
+    # python-gi \
     python3-gi \
     sox \
     subversion \
@@ -45,11 +45,13 @@ RUN apt-get update && apt-get install -y  \
     cifs-utils \
     unzip \
     apt-utils \
-    python-dateutil \
+    # python-dateutil \
     python3-dateutil \
     zlib1g-dev && \
     apt-get clean autoclean && \
     apt-get autoremove -y
+
+RUN apt-get install gfortran -y
 
 
 RUN apt-get update && apt-get install -y mpg123 \
@@ -63,7 +65,7 @@ RUN apt-get update && apt-get install -y mpg123 \
 # RUN python -m pip install --upgrade pip setuptools wheel pyasn1
 RUN python3 -m pip install --upgrade pip setuptools wheel pyasn1
 
-# RUN pip install futures requests pyasn1 schedule==0.6.0 setuptools
+# RUN pip install futures requests pyasn1 schedule==0.6.    0 setuptools
 # RUN pip3 install futures requests pyasn1 schedule==0.6.0 setuptools python-dateutil
 RUN pip3 install futures requests pyasn1 schedule==0.6.0 setuptools python-dateutil
 
@@ -74,13 +76,6 @@ RUN wget http://www.digip.org/jansson/releases/jansson-2.7.tar.bz2 && \
     echo "/usr/local/lib" >> /etc/ld.so.conf.d/jansson.conf && ldconfig && \
     rm /jansson-2.7.tar.bz2 && rm -rf /jansson-2.7
 
-#RUN git clone --recursive https://github.com/kubernetes-client/python.git && \
-#    cd python && \
-#    python3 setup.py install && \
-#    python setup.py install && \
-#    rm -rf python/
-# RUN pip install kubernetes && python3 -m pip install kubernetes
-# Fails here
 RUN pip install --ignore-installed kubernetes  
 RUN python3 -m pip install kubernetes
 
@@ -103,24 +98,48 @@ RUN python3 -m pip install --user tornado==4.5.3 ws4py==0.3.2 futures requests p
 RUN mkdir -p /home/appuser/opt
 WORKDIR /home/appuser/opt
 #Commit on May 15, 2019 
-ENV KALDI_SHA1 35f96db7082559a57dcc222218db3f0be6dd7983
+# ENV KALDI_SHA1 35f96db7082559a57dcc222218db3f0be6dd7983
+
+# Commit on Nov 20, 2020 (Kaldi)
+# Commit on Oct 13 (kaldi-nnet2-online)
+ENV TINI_VERSION=v0.18.0 \
+    KALDI_SHA1=882b0a6daba7d7a62d1a1037b1ced987946df2e1 \
+    KALDI_NNET2_ONLINE_SHA1=7888ae562a65bd7e406783ce2c33535bc66a30ef \
+    KALDI_GSTREAMER_SERVER_SHA1=9ce1ccc39fb734ca997982dd47197fc9b951b70f
+
+# RUN git clone https://github.com/kaldi-asr/kaldi && \
+#     cd /home/appuser/opt/kaldi && \
+#     git reset --hard $KALDI_SHA1 && \
+#     cd /home/appuser/opt/kaldi/tools && \
+#     make -j 2 && \
+#     ./install_portaudio.sh
+
 RUN git clone https://github.com/kaldi-asr/kaldi && \
     cd /home/appuser/opt/kaldi && \
-    git reset --hard $KALDI_SHA1 && \
-    cd /home/appuser/opt/kaldi/tools && \
-    # wget  http://www.portaudio.com/archives/pa_stable_v19_20111121.tgz
-    make -j 8 && \
-    ./install_portaudio.sh
+    git reset --hard $KALDI_SHA1
 
-RUN cd /home/appuser/opt/kaldi/src && ./configure --shared --mathlib=ATLAS && \
+
+# RUN cd /home/appuser/opt/kaldi/src && ./configure --shared --mathlib=ATLAS && \
+#     sed -i '/-g # -O0 -DKALDI_PARANOID/c\-O3 -DNDEBUG' kaldi.mk && \
+#     make -j 2 depend && make -j 2 && \
+#     cd /home/appuser/opt/kaldi/src/online && make -j 2 depend && make -j 2 && \
+#     cd /home/appuser/opt/kaldi/src/gst-plugin && make -j 2 depend && make -j 2
+
+COPY pa_stable_v19_20111121.tgz /home/appuser/opt/kaldi/tools/
+RUN cd /home/appuser/opt/kaldi/tools && \
+    make -j 2 && \
+    ./install_portaudio.sh && \
+    ./extras/install_irstlm.sh && \
+    cd /home/appuser/opt/kaldi/src && \
+    KALDI_ROOT=\/home\/appuser\/opt\/kaldi ./configure --shared --mathlib=ATLAS && \
     sed -i '/-g # -O0 -DKALDI_PARANOID/c\-O3 -DNDEBUG' kaldi.mk && \
     make -j 2 depend && make -j 2 && \
     cd /home/appuser/opt/kaldi/src/online && make -j 2 depend && make -j 2 && \
     cd /home/appuser/opt/kaldi/src/gst-plugin && make -j 2 depend && make -j 2
 
-ENV KALDI_NNET2_ONLINE_SHA1 617e43e73c7cc45eb9119028c02bd4178f738c4a
+# ENV KALDI_NNET2_ONLINE_SHA1 617e43e73c7cc45eb9119028c02bd4178f738c4a
 # https://github.com/alumae/gst-kaldi-nnet2-online/commit/617e43e73c7cc45eb9119028c02bd4178f738c4a
-
+# COPY --chown=appuser:appuser gst-kaldi-nnet2-online/ /home/appuser/opt/gst-kaldi-nnet2-online/
 RUN cd /home/appuser/opt && \
     git clone https://github.com/alumae/gst-kaldi-nnet2-online.git && \
     cd /home/appuser/opt/gst-kaldi-nnet2-online && \
@@ -135,12 +154,13 @@ RUN cd /home/appuser/opt && \
     find /home/appuser/opt/kaldi/src/ -type f -not -name '*.so' -delete && \
     find /home/appuser/opt/kaldi/tools/ -type f \( -not -name '*.so' -and -not -name '*.so*' \) -delete
 
-ENV KALDI_GSTRAMER_SERVER_SHA1 9ce1ccc39fb734ca997982dd47197fc9b951b70f
+
+# ENV KALDI_GSTRAMER_SERVER_SHA1 9ce1ccc39fb734ca997982dd47197fc9b951b70f
 #https://github.com/alumae/kaldi-gstreamer-server/commit/9ce1ccc39fb734ca997982dd47197fc9b951b70f
 
 RUN cd /home/appuser/opt && git clone https://github.com/alumae/kaldi-gstreamer-server.git && \
     cd /home/appuser/opt/kaldi-gstreamer-server && \
-    git reset --hard $KALDI_GSTRAMER_SERVER_SHA1 && \
+    git reset --hard $KALDI_GSTREAMER_SERVER_SHA1 && \
     rm -rf /home/appuser/opt/kaldi-gstreamer-server/.git/ && \
     rm -rf /home/appuser/opt/kaldi-gstreamer-server/test/
 
@@ -158,7 +178,7 @@ COPY scripts/decoder2.py scripts/decoder.py /home/appuser/opt/kaldi-gstreamer-se
 COPY scripts/sample_full_post_processor.py /home/appuser/opt/kaldi-gstreamer-server/
 
 # Add Tini
-ENV TINI_VERSION v0.18.0
+# ENV TINI_VERSION v0.18.0
 RUN wget https://github.com/krallin/tini/releases/download/v0.18.0/tini
 RUN chmod +x /home/appuser/opt/tini
 
