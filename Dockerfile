@@ -1,5 +1,5 @@
-# FROM debian:latest
-FROM debian:10.2
+FROM debian:latest
+# FROM debian:10.2
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV DEBIAN_FRONTEND noninteractive
@@ -26,17 +26,17 @@ RUN apt-get update && apt-get install -y  \
     python2.7 \
     python3 \
     build-essential \
-    python-pip \
+    # python-pip \
     python3-pip \
-    python-yaml \
+    # python-yaml \
     python3-yaml \
-    python-simplejson \
+    # python-simplejson \
     python3-simplejson \ 
-    python-requests \
+    # python-requests \
     python3-requests \
-    python-pyasn1 \
+    # python-pyasn1 \
     python3-pyasn1 \
-    python-gi \
+    # python-gi \
     python3-gi \
     sox \
     subversion \
@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y  \
     cifs-utils \
     unzip \
     apt-utils \
-    python-dateutil \
+    # python-dateutil \
     python3-dateutil \
     zlib1g-dev && \
     apt-get clean autoclean && \
@@ -60,10 +60,10 @@ RUN apt-get update && apt-get install -y mpg123 \
     gstreamer1.0-libav 
     # h264enc
 
-RUN python -m pip install --upgrade pip setuptools wheel pyasn1
+# RUN python -m pip install --upgrade pip setuptools wheel pyasn1
 RUN python3 -m pip install --upgrade pip setuptools wheel pyasn1
 
-RUN pip install futures requests pyasn1 schedule==0.6.0 setuptools
+# RUN pip install futures requests pyasn1 schedule==0.6.    0 setuptools
 # RUN pip3 install futures requests pyasn1 schedule==0.6.0 setuptools python-dateutil
 RUN pip3 install futures requests pyasn1 schedule==0.6.0 setuptools python-dateutil
 
