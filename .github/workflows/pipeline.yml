@@ -65,7 +65,7 @@ jobs:
     needs: build
     steps:
     - name: Clone fyp-cd
-      uses: actions/checkout@v1  
+      uses: actions/checkout@v3
       with:
         repository: kaikiat/fyp-cd
         token: ${{ secrets.CR_PAT }}
@@ -73,7 +73,5 @@ jobs:
       run: |
         echo 'Creating pull request'
         echo "Version number: ${{needs.build.outputs.new-tag}}"
-        # git clone git@github.com:kaikiat/fyp-cd.git
         ls
-        # cd fyp-cd
   
