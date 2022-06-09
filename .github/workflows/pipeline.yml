@@ -68,10 +68,13 @@ jobs:
       run: |
         echo 'Creating pull request'
         echo "Version number: ${{needs.build.outputs.new-tag}}"
-    - uses: actions/checkout@master
-      with:
-        name: https://github.com/kaikiat/fyp-cd
-        ref: refs/heads/main
-    - name: sed
-      run: |
+        git clone git@github.com:kaikiat/fyp-cd.git
         ls
+        cd fyp-cd
+    # - uses: actions/checkout@master
+    #   with:
+    #     name: https://github.com/kaikiat/fyp-cd
+    #     ref: refs/heads/main
+    # - name: sed
+    #   run: |
+    #     ls
