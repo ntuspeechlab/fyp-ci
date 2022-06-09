@@ -74,8 +74,8 @@ jobs:
         echo 'Creating push request'
         echo "Version number: ${{needs.build.outputs.new-tag}}"
     # - uses: actions/checkout@v3
-    - uses: Creating push request
-    - run: |
+    - name: Creating push request
+      run: |
         date > generated.txt
         git config user.name kaikiat
         git config user.email pohkaikiat98@gmail.com
