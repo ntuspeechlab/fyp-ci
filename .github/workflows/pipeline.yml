@@ -69,9 +69,16 @@ jobs:
       with:
         repository: kaikiat/fyp-cd
         token: ${{ secrets.CR_PAT }}
-    - name: Create pull request for fyp-cd
+    - name: Creating push request
       run: |
-        echo 'Creating pull request'
+        echo 'Creating push request'
         echo "Version number: ${{needs.build.outputs.new-tag}}"
-        ls
-  
+    - uses: actions/checkout@v3
+      run: |
+        date > generated.txt
+        git config user.name kaikiat
+        git config user.email pohkaikiat98@gmail.com
+        git add .
+        git commit -m "generated"
+        git push
+
