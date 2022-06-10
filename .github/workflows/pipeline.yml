@@ -82,3 +82,4 @@ jobs:
         git add .
         git commit -m "Version bump to ${{ needs.build.outputs.new-tag }}"
         git push
+        ls
