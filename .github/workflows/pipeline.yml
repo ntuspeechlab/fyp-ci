@@ -74,11 +74,11 @@ jobs:
       run: |
         echo 'Creating push request'
         echo "Version number: ${{needs.build.outputs.new-tag}}"
-    # - uses: actions/checkout@v3
     - name: Creating push request
       run: |
         git config user.name kaikiat
         git config user.email pohkaikiat98@gmail.com
+        sed -i "/  repository:./c\  repository:ghcr.io/${{github.repository}}:${{ steps.version-bump.outputs.newTag }}" google_staging_sample/helm/sgdecoding-online-scaled/values.yaml
         git add .
         git commit -m "generated"
         git push
