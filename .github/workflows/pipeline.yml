@@ -80,8 +80,8 @@ jobs:
         PATH: google_staging_sample/helm/sgdecoding-online-scaled/values.yaml
         REPO: ghcr.io/${{github.repository}}:${{ steps.version-bump.outputs.newTag }}
       run: |
-        git config user.name $USERNAME
-        git config user.email $EMAIL
+        git config user.name kaikiat
+        git config user.email pohkaikiat98@gmail.com
         sed -i "/  repository:./c\  repository:$repo" $path
         git add .
         git commit -m "generated"
