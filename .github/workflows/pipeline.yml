@@ -80,7 +80,7 @@ jobs:
         PATH: google_staging_sample/helm/sgdecoding-online-scaled/values.yaml
         REPO: ghcr.io/${{github.repository}}:${{ steps.version-bump.outputs.newTag }}
       run: |
-        date > generated.txt
+        # date > generated.txt
         git config user.name $USERNAME
         git config user.email $EMAIL
         sed -i "/  repository:./c\  repository:$repo" $path
