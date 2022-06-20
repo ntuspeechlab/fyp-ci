@@ -85,3 +85,4 @@ jobs:
         git commit -m "Version bump to 0.3.0"
         git push
         ls
+        
