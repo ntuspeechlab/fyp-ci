@@ -99,18 +99,21 @@ RUN mkdir -p /home/appuser/opt
 WORKDIR /home/appuser/opt
 #Commit on May 15, 2019 
 ENV KALDI_SHA1 35f96db7082559a57dcc222218db3f0be6dd7983
-RUN git clone https://github.com/kaldi-asr/kaldi && \
+
+RUN git clone https://github.com/kaikiat/kaldi.git --verbose && \
+    cd kaldi && \
+    git checkout feat/wget-test && \
     cd /home/appuser/opt/kaldi && \
-    git reset --hard $KALDI_SHA1 && \
     cd /home/appuser/opt/kaldi/tools && \
-    make -j 2 && \
+    make -j 8 && \
     ./install_portaudio.sh
+
 
 RUN cd /home/appuser/opt/kaldi/src && ./configure --shared --mathlib=ATLAS && \
     sed -i '/-g # -O0 -DKALDI_PARANOID/c\-O3 -DNDEBUG' kaldi.mk && \
-    make -j 2 depend && make -j 2 && \
-    cd /home/appuser/opt/kaldi/src/online && make -j 2 depend && make -j 2 && \
-    cd /home/appuser/opt/kaldi/src/gst-plugin && make -j 2 depend && make -j 2
+    make -j 8 depend && make -j 8 && \
+    cd /home/appuser/opt/kaldi/src/online && make -j 8 depend && make -j 8 && \
+    cd /home/appuser/opt/kaldi/src/gst-plugin && make -j 8 depend && make -j 8
 
 ENV KALDI_NNET2_ONLINE_SHA1 617e43e73c7cc45eb9119028c02bd4178f738c4a
 # https://github.com/alumae/gst-kaldi-nnet2-online/commit/617e43e73c7cc45eb9119028c02bd4178f738c4a
@@ -121,7 +124,7 @@ RUN cd /home/appuser/opt && \
     git reset --hard $KALDI_NNET2_ONLINE_SHA1 && \
     cd /home/appuser/opt/gst-kaldi-nnet2-online/src && \
     sed -i '/KALDI_ROOT?=\/home\/tanel\/tools\/kaldi-trunk/c\KALDI_ROOT?=\/home/appuser/opt\/kaldi' Makefile && \
-    make -j 2 depend && make -j 2 && \
+    make -j 8 depend && make -j 8 && \
     rm -rf /home/appuser/opt/gst-kaldi-nnet2-online/.git/ && \
     find /home/appuser/opt/gst-kaldi-nnet2-online/src/ -type f -not -name '*.so' -delete && \
     rm -rf /home/appuser/opt/kaldi/.git && \

@@ -27,7 +27,7 @@ import tornado.websocket
 import tornado.gen
 import tornado.concurrent
 import concurrent.futures
-# import settings
+import settings
 import common
 import master_server_addon
 import prometheus_client as prom
@@ -144,14 +144,13 @@ def content_type_to_caps(content_type):
         return content_type
 
 class SpawnWorker(threading.Thread):
-    def __init__(self, model=None, preview=False, *args, **kwargs):
+    def __init__(self, model=None, *args, **kwargs):
         super(SpawnWorker, self).__init__(*args, **kwargs)
         self.model = model
-        self.preview = preview
 
     def run(self):
         logger.info("Begin to spawn another worker of model: "+ str(self.model))
-        master_server_addon.spawn_worker(self.model, self.preview)
+        master_server_addon.spawn_worker(self.model)
         logger.info("Spawn another worker")
 
 
@@ -380,11 +379,6 @@ class DecoderSocketHandler(tornado.websocket.WebSocketHandler):
         self.user_id = self.get_argument("user-id", "none", True)
         self.content_id = self.get_argument("content-id", "none", True)
         self.worker = None
-        self.preview = self.get_argument("preview", default=False)
-        if self.preview == 'True':
-            print('self.preview(true)',self.preview)
-        else:
-            print('self.preview(false)',self.preview)
 
         # for Prometheus monitoring
         num_worker.set(len(self.application.available_workers))
@@ -399,7 +393,7 @@ class DecoderSocketHandler(tornado.websocket.WebSocketHandler):
             
             if spawn_worker:
                 logger.info("Start spawning a new worker")
-                SpawnWorker(model=model, preview=self.preview).start()
+                SpawnWorker(model=model).start()
 
             self.worker = self.application.available_workers[model].pop()
 

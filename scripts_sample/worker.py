@@ -70,6 +70,7 @@ class ServerWebsocket(worker_addon.BaseServerWebsocket):
             uri = uri + '?%s' % (urllib.urlencode([("model", os.getenv('MODEL_DIR')  )]))
         else:
             uri = uri + '?%s' % (urllib.parse.urlencode([("model", os.getenv('MODEL_DIR')  )]))
+
         self.uri = uri
 
         worker_model.info({'model': os.getenv('MODEL_DIR')})
@@ -434,6 +435,32 @@ class ServerWebsocket(worker_addon.BaseServerWebsocket):
         else:
             raise tornado.gen.Return(texts)
 
+    #    if self.post_processor:
+    #        logging.debug("%s: Waiting for postprocessor lock" % self.request_id)
+    #        if blocking:
+    #            timeout=None
+    #        else:
+    #            timeout=0.0
+    #        try:
+    #            with (yield self.post_processor_lock.acquire(timeout)):
+    #                result = []
+    #                for text in texts:
+    #                    self.post_processor.stdin.write("%s\n" % text.encode("utf-8"))
+    #                    self.post_processor.stdin.flush()
+    #                    logging.debug("%s: Starting postprocessing: %s"  % (self.request_id, text))
+    #                    text = yield self.post_processor.stdout.read_until('\n')
+    #                    text = text.decode("utf-8")
+    #                    logging.debug("%s: Postprocessing returned: %s"  % (self.request_id, text))
+    #                    text = text.strip()
+    #                    text = text.replace("\\n", "\n")
+    #                    result.append(text)
+    #                raise tornado.gen.Return(result)
+    #        except tornado.gen.TimeoutError:
+    #            logging.debug("%s: Skipping postprocessing since post-processor already in use"  % (self.request_id))
+    #            raise tornado.gen.Return(None)
+    #    else:
+    #        raise tornado.gen.Return(texts)
+            
     @tornado.gen.coroutine
     def post_process_full(self, full_result):
         if self.full_post_processor:
@@ -475,12 +502,32 @@ class ServerWebsocket(worker_addon.BaseServerWebsocket):
                 hyp["transcript"] = processed_transcripts[i]
         
         raise tornado.gen.Return(full_result)
+        #if self.full_post_processor:
+        #    self.full_post_processor.stdin.write("%s\n\n" % json.dumps(full_result))
+        #    self.full_post_processor.stdin.flush()
+        #    lines = []
+        #    while True:
+        #        l = self.full_post_processor.stdout.readline()
+        #        if not l: break # EOF
+        #         if l.strip() == "":
+        #            break
+        #        lines.append(l)
+        #    full_result = json.loads("".join(lines))
+
+        #elif self.post_processor:
+        #    transcripts = []
+        #    for hyp in full_result.get("result", {}).get("hypotheses", []):
+        #        transcripts.append(hyp["transcript"])
+        #    processed_transcripts = yield self.post_process(transcripts, blocking=True)
+        #    for (i, hyp) in enumerate(full_result.get("result", {}).get("hypotheses", [])):
+        #        hyp["original-transcript"] = hyp["transcript"]
+        #        hyp["transcript"] = processed_transcripts[i]
+        #raise tornado.gen.Return(full_result)        
 
 def main_loop(uri, decoder_pipeline, post_processor, full_post_processor=None):
     logger.info('starting worker | uri: {}'.format(uri))
     while True:
         ws = ServerWebsocket(uri, decoder_pipeline, post_processor, full_post_processor=full_post_processor)
-
         try:
             logger.info("Opening websocket connection to master server")
             ws.connect()
@@ -545,6 +592,8 @@ def main():
 
     loop = GObject.MainLoop()
     thread.start_new_thread(loop.run, ())
+    # thread.start_new_thread(main_loop, (args.uri, decoder_pipeline, post_processor, full_post_processor))  
+    # tornado.ioloop.IOLoop.current().start()
     thread.start_new_thread(tornado.ioloop.IOLoop.instance().start, ())
     main_loop(args.uri, decoder_pipeline, post_processor, full_post_processor)    # so that can auto exit
 

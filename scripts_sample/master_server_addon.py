@@ -9,6 +9,7 @@ import sys
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
+
 IMAGE = os.getenv("IMAGE", False)
 MASTER = os.getenv("MASTER", False)
 NAMESPACE = os.getenv("NAMESPACE", False)
@@ -23,7 +24,7 @@ if IMAGE == False or MASTER == False or NAMESPACE == False:
 config.load_kube_config()
 
 
-def spawn_worker(model, preview):
+def spawn_worker(model):
     """
     Spawn a new worker with the model specified if all the workers are in use.
     Call this function before pop()
@@ -35,14 +36,14 @@ def spawn_worker(model, preview):
     if MASTER == 'master:8080':
         return
 
-    create_job(model, preview)
+    create_job(model)
 
 
 def id_generator(size=6, chars=string.ascii_lowercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 
-def create_job(MODEL, preview):
+def create_job(MODEL):
     assert MODEL is not None, "model name is None, cannot spawn a new worker"
 
     api = client.BatchV1Api()
@@ -65,14 +66,13 @@ def create_job(MODEL, preview):
         name='models-efs',
         persistent_volume_claim=efs_volume_claim
     )
-    # sgdecoding-online-scaled-master
     env_vars = {
-        "MASTER": "sgdecoding-online-scaled-master-preview" if preview else MASTER,
+        "MASTER": MASTER,
         "NAMESPACE": NAMESPACE,
         "RUN_FREQ": "ONCE",
         "MODEL_DIR": MODEL,
     }
-    print('env_vars =',env_vars)
+
     env_list = []
     if env_vars:
         for env_name, env_value in env_vars.items():
