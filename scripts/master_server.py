@@ -117,7 +117,7 @@ class Application(tornado.web.Application):
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.set_status(200)
-        self.finish("Speechlab Streamer")
+        self.finish("Speechlab Streamer 27 Aug 10.26pm")
 
 
 class TestConnectionHandler(tornado.web.RequestHandler):
