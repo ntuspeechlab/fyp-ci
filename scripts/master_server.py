@@ -39,7 +39,8 @@ logger.setLevel(logging.DEBUG)
 # create console handler and set level to debug
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
-logfh = logging.handlers.RotatingFileHandler('master_server.log', maxBytes=31457280, backupCount=10) #30Mb
+logfh = logging.handlers.RotatingFileHandler(
+    'master_server.log', maxBytes=31457280, backupCount=10)  # 30Mb
 logfh.setLevel(logging.DEBUG)
 
 # create formatter
@@ -60,7 +61,8 @@ num_req = prom.Counter('number_of_request_receive_by_master',
 num_worker = prom.Gauge('number_of_worker_available',
                         'number of worker available')
 num_req_reject = prom.Counter(
-        'number_of_request_reject', 'number_of_request_reject')
+    'number_of_request_reject', 'number_of_request_reject')
+
 
 class Application(tornado.web.Application):
     def __init__(self):
@@ -143,6 +145,7 @@ def content_type_to_caps(content_type):
     else:
         return content_type
 
+
 class SpawnWorker(threading.Thread):
     def __init__(self, model=None, preview=False, *args, **kwargs):
         super(SpawnWorker, self).__init__(*args, **kwargs)
@@ -150,7 +153,8 @@ class SpawnWorker(threading.Thread):
         self.preview = preview
 
     def run(self):
-        logger.info("Begin to spawn another worker of model: "+ str(self.model))
+        logger.info("Begin to spawn another worker of model: " +
+                    str(self.model))
         master_server_addon.spawn_worker(self.model, self.preview)
         logger.info("Spawn another worker")
 
@@ -169,7 +173,7 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
         self.user_id = self.request.headers.get("device-id", "none")
         self.content_id = self.request.headers.get("content-id", "none")
         logger.info("%s: OPEN: user='%s', content='%s'" %
-                     (self.id, self.user_id, self.content_id))
+                    (self.id, self.user_id, self.content_id))
         self.worker = None
         self.error_status = 0
         self.error_message = None
@@ -183,7 +187,8 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
             spawn_worker = (model not in list(self.application.available_workers.keys())) or len(
                 self.application.available_workers[model]) <= 5
             if spawn_worker:
-                logger.info('no available workers for model: {}, spawning new worker'.format(model))
+                logger.info(
+                    'no available workers for model: {}, spawning new worker'.format(model))
                 SpawnWorker(model=model).start()
 
             self.worker = self.application.available_workers[model].pop()
@@ -195,7 +200,7 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
             if content_type:
                 content_type = content_type_to_caps(content_type)
                 logger.info("%s: Using content type: %s" %
-                             (self.id, content_type))
+                            (self.id, content_type))
 
             self.worker.write_message(json.dumps(dict(
                 id=self.id, content_type=content_type, user_id=self.user_id, content_id=self.content_id)))
@@ -255,7 +260,7 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
         if len(event_str) > 100:
             event_str = event_str[:97] + "..."
         logger.info("%s: Receiving event %s from worker" %
-                     (self.id, event_str))
+                    (self.id, event_str))
         if event["status"] == 0 and ("result" in event):
             try:
                 if len(event["result"]["hypotheses"]) > 0 and event["result"]["final"]:
@@ -334,9 +339,12 @@ class WorkerSocketHandler(tornado.websocket.WebSocketHandler):
             self.application.available_workers[self.get_argument("model", "none", True)] = {
                 self}
 
-        logger.info("New " + self.get_argument("model", "none", True) + " worker is available: " + self.__str__() )
-        logger.info("Available workers: " +  str(self.application.available_workers))
-        logger.info("Number of worker available (worker) " + str(len(self.application.available_workers)))
+        logger.info("New " + self.get_argument("model", "none",
+                    True) + " worker is available: " + self.__str__())
+        logger.info("Available workers: " +
+                    str(self.application.available_workers))
+        logger.info("Number of worker available (worker) " +
+                    str(len(self.application.available_workers)))
 
         self.application.send_status_update()
 
@@ -382,9 +390,9 @@ class DecoderSocketHandler(tornado.websocket.WebSocketHandler):
         self.worker = None
         self.preview = self.get_argument("preview", default=False)
         if self.preview == 'True':
-            print('self.preview(true)',self.preview)
+            print('self.preview(true)', self.preview)
         else:
-            print('self.preview(false)',self.preview)
+            print('self.preview(false)', self.preview)
 
         # for Prometheus monitoring
         num_worker.set(len(self.application.available_workers))
@@ -393,10 +401,11 @@ class DecoderSocketHandler(tornado.websocket.WebSocketHandler):
         logger.info("client with ws requested model: " + str(model))
 
         try:
-            logger.info("self.application.available_workers: " + str(self.application.available_workers))
+            logger.info("self.application.available_workers: " +
+                        str(self.application.available_workers))
             spawn_worker = (model not in list(self.application.available_workers.keys())) or len(
                 self.application.available_workers[model]) <= 0
-            
+
             if spawn_worker:
                 logger.info("Start spawning a new worker")
                 SpawnWorker(model=model, preview=self.preview).start()
@@ -409,16 +418,19 @@ class DecoderSocketHandler(tornado.websocket.WebSocketHandler):
 
             content_type = self.get_argument("content-type", None, True)
             if content_type:
-                logger.info("%s: Using content type: %s" % (self.id, content_type))
+                logger.info("%s: Using content type: %s" %
+                            (self.id, content_type))
 
             self.worker.write_message(json.dumps(dict(
                 id=self.id, content_type=content_type, user_id=self.user_id, content_id=self.content_id, model=model)))
         except KeyError:
-            logger.warning("%s: No worker available for client request" % self.id)
+            logger.warning(
+                "%s: No worker available for client request" % self.id)
             event = dict(status=common.STATUS_NOT_AVAILABLE,
                          message="No decoder available, try again 60 seconds later")
             num_req_reject.inc(1)
-            logger.info("Number of requests processed: " + str(self.application.num_requests_processed))
+            logger.info("Number of requests processed: " +
+                        str(self.application.num_requests_processed))
 
             self.send_event(event)
             self.close()

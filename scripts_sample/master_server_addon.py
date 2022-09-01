@@ -1,5 +1,6 @@
 # pylint: disable=import-error
 
+import threading
 import logging
 import random
 import string
@@ -48,7 +49,8 @@ def create_job(MODEL):
 
     api = client.BatchV1Api()
     body = client.V1Job(api_version="batch/v1", kind="Job")
-    name = 'speechlab-worker-job-{}-{}'.format(MODEL.lower().replace("_", "-"), id_generator())
+    name = 'speechlab-worker-job-{}-{}'.format(
+        MODEL.lower().replace("_", "-"), id_generator())
     body.metadata = client.V1ObjectMeta(namespace=NAMESPACE, name=name)
     body.status = client.V1JobStatus()
     template = client.V1PodTemplate()
@@ -91,14 +93,14 @@ def create_job(MODEL):
                                    security_context=client.V1SecurityContext(
                                        privileged=True, capabilities=client.V1Capabilities(add=["SYS_ADMIN"])),
                                    resources=client.V1ResourceRequirements(
-                                       limits={"memory": "6G", "cpu": "1"}, 
+                                       limits={"memory": "6G", "cpu": "1"},
                                        requests={"memory": "5G", "cpu": "0.8"}
-                                       ),
-                                   volume_mounts=[client.V1VolumeMount(
-                                        mount_path="/home/appuser/opt/models",
-                                        name="models-efs",
-                                        read_only=True
-                                    )]
+    ),
+        volume_mounts=[client.V1VolumeMount(
+            mount_path="/home/appuser/opt/models",
+            name="models-efs",
+            read_only=True
+        )]
     )
 
     template.template.spec = client.V1PodSpec(containers=[container],
@@ -114,14 +116,13 @@ def create_job(MODEL):
     try:
         logging.info('trying to create job')
         api_response = api.create_namespaced_job(NAMESPACE, body)
-        print("api_response="+ str(api_response))
+        print("api_response=" + str(api_response))
         return True
     except ApiException as e:
         logging.exception('error spawning new job: ' + str(e))
         print("Exception when creating a job: %s\n" % e)
 
 
-import threading
 class SpawnWorker(threading.Thread):
     def __init__(self, model=None, *args, **kwargs):
         super(SpawnWorker, self).__init__(*args, **kwargs)
@@ -132,7 +133,6 @@ class SpawnWorker(threading.Thread):
         print("Spawn another worker from outside of master_server.py")
 
 
-import sys
 if __name__ == "__main__":
     model = sys.argv[1]
     SpawnWorker(model=model).start()

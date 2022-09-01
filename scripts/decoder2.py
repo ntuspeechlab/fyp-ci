@@ -3,46 +3,49 @@ Created on May 17, 2013
 @author: tanel
 """
 from __future__ import print_function
+import sys
+import os
+import gc
+import json
+import requests
+import pdb
+from collections import OrderedDict
+import locale
+import logging
+from gi.repository import GObject, Gst
 import gi
 
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst
 
 GObject.threads_init()
 Gst.init(None)
-import os,sys
-import logging
-import locale
-if locale.getpreferredencoding().upper() != 'UTF-8': 
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8') 
+if locale.getpreferredencoding().upper() != 'UTF-8':
+    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 if sys.version_info[0] < 3:
-  import thread
+    import thread
 else:
-  import _thread as thread
-from collections import OrderedDict
+    import _thread as thread
+
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
+
 logger = logging.getLogger(__name__)
 
-import pdb
-import requests
-import json
-import gc
 
+SUD_API = os.getenv('SUD_API', '')
 
-SUD_API                      = os.getenv('SUD_API', '')
+MODEL_DIR = os.getenv('MODEL_DIR', '')
+SUD_EnAPI = 'http://40.90.168.84:8060/punctuate'
+SUD_CnAPI = 'http://40.90.169.207:8061/punctuate'
 
-MODEL_DIR=os.getenv('MODEL_DIR', '')
-SUD_EnAPI='http://40.90.168.84:8060/punctuate'
-SUD_CnAPI='http://40.90.169.207:8061/punctuate'
+sud_enable = str(os.getenv('USING_SUD', 'no')).lower().strip()
+text_normalization_enable = str(
+    os.getenv('TEXT_NORMALIZATION', 'no')).lower().strip()
 
-sud_enable                   = str(os.getenv('USING_SUD', 'no')).lower().strip()
-text_normalization_enable    = str(os.getenv('TEXT_NORMALIZATION', 'no')).lower().strip()
-
-CONTAINER=""
+CONTAINER = ""
 
 
 def sendToSUD(inputUtterance):
@@ -51,17 +54,20 @@ def sendToSUD(inputUtterance):
 
     headers = {"accept": "application/json"}
     payload = {"input_text": inputUtterance}
-    r = requests.post(url = SUD_API, headers=headers, data=payload)
-	
+    r = requests.post(url=SUD_API, headers=headers, data=payload)
+
     data = r.json()
     return data['result']
 
+
 def normalizedText(inputText):
     escaped_text = inputText.replace("'", "\'")
-    norm_command = 'echo "' + escaped_text + '" | normalize-english-number-text - -'
-    #os.system(norm_command)
+    norm_command = 'echo "' + escaped_text + \
+        '" | normalize-english-number-text - -'
+    # os.system(norm_command)
     output_text = os.popen(norm_command).read().strip()
-    return output_text 
+    return output_text
+
 
 def disfluenciesRemover(inString):
     disfluencies = [
@@ -84,7 +90,7 @@ def disfluenciesRemover(inString):
         if word.strip().lower() in disfluencies:
             continue
         else:
-            newline += word + ' '    
+            newline += word + ' '
     return newline.strip()
 
 
@@ -97,7 +103,8 @@ class DecoderPipeline2(object):
             if not os.path.exists(self.outdir):
                 os.makedirs(self.outdir)
             elif not os.path.isdir(self.outdir):
-                raise Exception("Output directory %s already exists as a file" % self.outdir)
+                raise Exception(
+                    "Output directory %s already exists as a file" % self.outdir)
 
         self.result_handler = None
         self.full_result_handler = None
@@ -110,8 +117,10 @@ class DecoderPipeline2(object):
 
         self.appsrc = Gst.ElementFactory.make("appsrc", "appsrc")
         self.decodebin = Gst.ElementFactory.make("decodebin", "decodebin")
-        self.audioconvert = Gst.ElementFactory.make("audioconvert", "audioconvert")
-        self.audioresample = Gst.ElementFactory.make("audioresample", "audioresample")
+        self.audioconvert = Gst.ElementFactory.make(
+            "audioconvert", "audioconvert")
+        self.audioresample = Gst.ElementFactory.make(
+            "audioresample", "audioresample")
         self.tee = Gst.ElementFactory.make("tee", "tee")
         self.queue1 = Gst.ElementFactory.make("queue", "queue1")
         self.filesink = Gst.ElementFactory.make("filesink", "filesink")
@@ -124,29 +133,31 @@ class DecoderPipeline2(object):
             eprint("ERROR: Couldn't create the kaldinnet2onlinedecoder element!")
             gst_plugin_path = os.environ.get("GST_PLUGIN_PATH")
             if gst_plugin_path:
-                #print >> sys.stderr, \
+                # print >> sys.stderr, \
                 eprint(
-                    "Couldn't find kaldinnet2onlinedecoder element at %s. " \
-                    "If it's not the right path, try to set GST_PLUGIN_PATH to the right one, and retry. " \
-                    "You can also try to run the following command: " \
-                    "'GST_PLUGIN_PATH=%s gst-inspect-1.0 kaldinnet2onlinedecoder'." \
+                    "Couldn't find kaldinnet2onlinedecoder element at %s. "
+                    "If it's not the right path, try to set GST_PLUGIN_PATH to the right one, and retry. "
+                    "You can also try to run the following command: "
+                    "'GST_PLUGIN_PATH=%s gst-inspect-1.0 kaldinnet2onlinedecoder'."
                     % (gst_plugin_path, gst_plugin_path))
             else:
-                #print >> sys.stderr, \
+                # print >> sys.stderr, \
                 eprint(
-                    "The environment variable GST_PLUGIN_PATH wasn't set or it's empty. " \
+                    "The environment variable GST_PLUGIN_PATH wasn't set or it's empty. "
                     "Try to set GST_PLUGIN_PATH environment variable, and retry.")
-            sys.exit(-1);
+            sys.exit(-1)
 
         # This needs to be set first
         if "use-threaded-decoder" in conf["decoder"]:
-            self.asr.set_property("use-threaded-decoder", conf["decoder"]["use-threaded-decoder"])
+            self.asr.set_property("use-threaded-decoder",
+                                  conf["decoder"]["use-threaded-decoder"])
 
         decoder_config = conf.get("decoder", {})
         if 'nnet-mode' in decoder_config:
-          logger.info("Setting decoder property: %s = %s" % ('nnet-mode', decoder_config['nnet-mode']))
-          self.asr.set_property('nnet-mode', decoder_config['nnet-mode'])
-          del decoder_config['nnet-mode']
+            logger.info("Setting decoder property: %s = %s" %
+                        ('nnet-mode', decoder_config['nnet-mode']))
+            self.asr.set_property('nnet-mode', decoder_config['nnet-mode'])
+            del decoder_config['nnet-mode']
 
         decoder_config = OrderedDict(decoder_config)
 
@@ -154,25 +165,27 @@ class DecoderPipeline2(object):
             decoder_config["fst"] = decoder_config.pop("fst")
         if "model" in decoder_config:
             decoder_config["model"] = decoder_config.pop("model")
-        
+
         if sys.version_info[0] < 3:
             for (key, val) in decoder_config.iteritems():
                 if key != "use-threaded-decoder":
-                    logger.info("Setting decoder property: %s = %s" % (key, val))
+                    logger.info("Setting decoder property: %s = %s" %
+                                (key, val))
                     self.asr.set_property(key, val)
         else:
             for (key, val) in decoder_config.items():
                 if key != "use-threaded-decoder":
-                    logger.info("Setting decoder property: %s = %s" % (key, val))
+                    logger.info("Setting decoder property: %s = %s" %
+                                (key, val))
                     self.asr.set_property(key, val)
-        
+
         self.appsrc.set_property("is-live", True)
         self.filesink.set_property("location", "/dev/null")
         logger.info('Created GStreamer elements')
 
         self.pipeline = Gst.Pipeline()
         for element in [self.appsrc, self.decodebin, self.audioconvert, self.audioresample, self.tee,
-                        self.queue1, self.filesink, 
+                        self.queue1, self.filesink,
                         self.queue2, self.asr, self.fakesink]:
             logger.debug("Adding %s to the pipeline" % element)
             self.pipeline.add(element)
@@ -180,7 +193,7 @@ class DecoderPipeline2(object):
         logger.info('Linking GStreamer elements')
 
         self.appsrc.link(self.decodebin)
-        #self.appsrc.link(self.audioconvert)
+        # self.appsrc.link(self.audioconvert)
         self.decodebin.connect('pad-added', self._connect_decoder)
         self.audioconvert.link(self.audioresample)
 
@@ -188,7 +201,7 @@ class DecoderPipeline2(object):
 
         self.tee.link(self.queue1)
         self.queue1.link(self.filesink)
-        
+
         self.tee.link(self.queue2)
         self.queue2.link(self.asr)
 
@@ -220,7 +233,8 @@ class DecoderPipeline2(object):
         if sys.version_info[0] < 3:
             decoded_hyp = hyp.decode('utf8')
 
-        logger.info("%s: Got partial result: %s" % (self.request_id, decoded_hyp))
+        logger.info("%s: Got partial result: %s" %
+                    (self.request_id, decoded_hyp))
         if self.result_handler:
             self.result_handler(decoded_hyp, False)
 
@@ -235,11 +249,12 @@ class DecoderPipeline2(object):
             final_hyp = normalizedText(final_hyp)
         if ('yes' == sud_enable) or ('mandarin' in MODEL_DIR.lower()):
             final_hyp = sendToSUD(final_hyp)
-            logger.info("%s: Got final result (after sud): %s" % (self.request_id, final_hyp))
+            logger.info("%s: Got final result (after sud): %s" %
+                        (self.request_id, final_hyp))
 
         if self.result_handler:
             self.result_handler(final_hyp, True)
-        
+
         # Write to the text file
         with open(os.path.join(self.outdir, (str(self.request_id)) + ".txt"), "a") as myfile:
             myfile.write(final_hyp)
@@ -249,22 +264,26 @@ class DecoderPipeline2(object):
         full_final_json = result_json
         if sys.version_info[0] < 3:
             full_final_json = result_json.decode('utf8')
-        logger.info("%s:  Got full final result: %s" % (self.request_id, full_final_json))
-        
+        logger.info("%s:  Got full final result: %s" %
+                    (self.request_id, full_final_json))
+
         event = json.loads(full_final_json)
-        best_hypothesis = disfluenciesRemover(event["result"]["hypotheses"][0]["transcript"])
-        
+        best_hypothesis = disfluenciesRemover(
+            event["result"]["hypotheses"][0]["transcript"])
+
         if ('yes' == text_normalization_enable):
             best_hypothesis = normalizedText(best_hypothesis)
         if ('yes' == sud_enable) or ('mandarin' in MODEL_DIR.lower()):
             best_hypothesis = sendToSUD(best_hypothesis)
-            logger.info("%s: Got full final result (after sud): %s" % (self.request_id, best_hypothesis))
-        
+            logger.info("%s: Got full final result (after sud): %s" %
+                        (self.request_id, best_hypothesis))
+
         event["result"]["hypotheses"][0]["transcript"] = best_hypothesis
         full_final_json = json.dumps(event)
-        
+
         if self.full_result_handler:
-            logger.info("%s: Send full final result to worker : %s" % (self.request_id, full_final_json))
+            logger.info("%s: Send full final result to worker : %s" %
+                        (self.request_id, full_final_json))
             self.full_result_handler(full_final_json)
 
     def _on_error(self, bus, msg):
@@ -276,11 +295,12 @@ class DecoderPipeline2(object):
 
     def _on_eos(self, bus, msg):
         logger.info('%s: Pipeline received eos signal' % (self.request_id))
-        #self.decodebin.unlink(self.audioconvert)
+        # self.decodebin.unlink(self.audioconvert)
         self.finish_request()
         if self.eos_handler:
             self.eos_handler[0](self.eos_handler[1])
-            logger.info('%s: From decoder: ALL FINISHED PROPERLY' % (self.request_id))
+            logger.info('%s: From decoder: ALL FINISHED PROPERLY' %
+                        (self.request_id))
 
     def get_adaptation_state(self):
         logger.info("Started returning adaptation-state")
@@ -301,23 +321,23 @@ class DecoderPipeline2(object):
             self.filesink.set_state(Gst.State.NULL)
             self.filesink.set_property('location', "/dev/null")
             self.filesink.set_state(Gst.State.PLAYING)
-            
+
         logger.info("%s: Set the pipeline state to NULL" % (self.request_id))
         self.pipeline.set_state(Gst.State.NULL)
-        #try:
+        # try:
         #    #
         #    self.upload_to_cloud("%s/%s.raw" % (self.outdir, self.request_id))
         #    self.upload_to_cloud("%s/%s.txt" % (self.outdir, self.request_id))
-        #except:
+        # except:
         #    logger.info("%s: Exception while uploading to cloud" % (self.request_id))
 
         self.request_id = "<undefined>"
-        logger.info("%s: Set the pipeline state to NULL: FINISHED." % (self.request_id))
-
+        logger.info("%s: Set the pipeline state to NULL: FINISHED." %
+                    (self.request_id))
 
     def init_request(self, id, caps_str):
         self.request_id = id
-        #self.remote_ip = remote_ip   
+        #self.remote_ip = remote_ip
         logger.info("%s: Initializing request" % (self.request_id))
         if caps_str and len(caps_str) > 0:
             logger.info("%s: Setting caps to %s" % (self.request_id, caps_str))
@@ -326,18 +346,19 @@ class DecoderPipeline2(object):
         else:
             #caps = Gst.caps_from_string("")
             self.appsrc.set_property("caps", None)
-            #self.pipeline.set_state(Gst.State.READY)
+            # self.pipeline.set_state(Gst.State.READY)
             pass
-        #self.appsrc.set_state(Gst.State.PAUSED)
+        # self.appsrc.set_state(Gst.State.PAUSED)
 
         if self.outdir:
             self.pipeline.set_state(Gst.State.PAUSED)
             self.filesink.set_state(Gst.State.NULL)
-            self.filesink.set_property('location', "%s/%s.raw" % (self.outdir, id))
+            self.filesink.set_property(
+                'location', "%s/%s.raw" % (self.outdir, id))
             self.filesink.set_state(Gst.State.PLAYING)
 
-        #self.filesink.set_state(Gst.State.PLAYING)
-        #self.decodebin.set_state(Gst.State.PLAYING)
+        # self.filesink.set_state(Gst.State.PLAYING)
+        # self.decodebin.set_state(Gst.State.PLAYING)
         self.pipeline.set_state(Gst.State.PLAYING)
         self.filesink.set_state(Gst.State.PLAYING)
         # push empty buffer (to avoid hang on client diconnect)
@@ -348,8 +369,9 @@ class DecoderPipeline2(object):
         self.set_adaptation_state("")
 
     def process_data(self, data):
-        logger.debug('%s: Pushing buffer of size %d with type %s to pipeline' % (self.request_id, len(data), type(data)))
-        #gc.set_debug(gc.DEBUG_LEAK)
+        logger.debug('%s: Pushing buffer of size %d with type %s to pipeline' % (
+            self.request_id, len(data), type(data)))
+        # gc.set_debug(gc.DEBUG_LEAK)
         buf = Gst.Buffer.new_allocate(None, len(data), None)
         buf.fill(0, data)
         self.appsrc.emit("push-buffer", buf)
@@ -372,22 +394,21 @@ class DecoderPipeline2(object):
     def set_error_handler(self, handler):
         self.error_handler = handler
 
-
     def cancel(self):
-        logger.info("%s: Sending EOS to pipeline in order to cancel processing" % (self.request_id))
+        logger.info("%s: Sending EOS to pipeline in order to cancel processing" % (
+            self.request_id))
         self.appsrc.emit("end-of-stream")
         #self.asr.set_property("silent", True)
-        #self.pipeline.set_state(Gst.State.NULL)
+        # self.pipeline.set_state(Gst.State.NULL)
 
-        #if (self.pipeline.get_state() == Gst.State.PLAYING):
+        # if (self.pipeline.get_state() == Gst.State.PLAYING):
         #logger.debug("Sending EOS to pipeline")
-        #self.pipeline.send_event(Gst.Event.new_eos())
-        #self.pipeline.set_state(Gst.State.READY)
+        # self.pipeline.send_event(Gst.Event.new_eos())
+        # self.pipeline.set_state(Gst.State.READY)
         logger.info("%s: Cancelled pipeline" % (self.request_id))
 
     def upload_to_cloud(self, full_file_path):
         local_file_name = os.path.basename(full_file_path)
         logger.info("\nUploading to Blob storage as blob " + local_file_name)
-        self.block_blob_service.create_blob_from_path(CONTAINER, local_file_name, full_file_path)
-
-
+        self.block_blob_service.create_blob_from_path(
+            CONTAINER, local_file_name, full_file_path)
