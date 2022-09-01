@@ -1,5 +1,7 @@
 ## fyp-ci
-
+## Commits
+1. To skip ci commit use `git commit -m '[skip ci]: commit message'`
+2. For empty commit use `git commit --allow-empty -m "ci: retrigger ci pipeline"`
 
 ## References   
 1. Github version bump: [https://github.com/phips28/gh-action-bump-version](https://github.com/phips28/gh-action-bump-version)
