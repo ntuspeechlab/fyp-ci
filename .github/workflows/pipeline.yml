@@ -76,7 +76,7 @@ jobs:
       run: |
         git config user.name kaikiat
         git config user.email pohkaikiat98@gmail.com
-        export dt=date +"%s"
+        export dt=$(date +"%s")
         git pull
         git checkout -b ${dt}
         # sed -i "/  repository: ./c\  repository: ghcr.io/${{github.repository}}:${{ needs.build.outputs.new-tag }}" blue_green/sgdecoding-online-scaled/values.yaml
