@@ -31,6 +31,7 @@ import concurrent.futures
 import common
 import master_server_addon
 import prometheus_client as prom
+from datetime import datetime
 
 # create logger
 logger = logging.getLogger('master_server')
@@ -118,9 +119,9 @@ class Application(tornado.web.Application):
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
+        now = datetime.now()
         self.set_status(200)
-        self.finish("Speechlab Streamer 1 Sept 10.02pm")
-
+        self.finish("Speechlab Streamer" + str(now))
 
 class TestConnectionHandler(tornado.web.RequestHandler):
     def get(self):
