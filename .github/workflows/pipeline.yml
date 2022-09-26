@@ -58,29 +58,29 @@ jobs:
         docker tag $CONTAINER_IMAGE $GH_CONTAINER_IMAGE
         docker push $GH_CONTAINER_IMAGE
   # Optional Step
-  pr:
-    name: Pull Request
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - name: Clone fyp-cd
-      uses: actions/checkout@v3
-      with:
-        repository: kaikiat/fyp-cd
-        token: ${{ secrets.CR_PAT }}
-    - name: Echo
-      run: |
-        echo 'Creating push request'
-        echo "Version number: ${{needs.build.outputs.new-tag}}"
-    - name: Creating push request
-      run: |
-        git config user.name kaikiat
-        git config user.email pohkaikiat98@gmail.com
-        export dt=$(date +"%s")
-        git pull
-        git checkout -b ${dt}
-        sed -i "/  tag: ./c\  tag: ${{ needs.build.outputs.new-tag }}" blue_green/sgdecoding-online-scaled/values.yaml
-        git add .
-        git commit -m "Version bump to ${{ needs.build.outputs.new-tag }}"
-        git push origin ${dt}
+  # pr:
+  #   name: Pull Request
+  #   if: "!contains(github.event.commits[0].message, '[skip ci]')"
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   steps:
+  #   - name: Clone fyp-cd
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: kaikiat/fyp-cd
+  #       token: ${{ secrets.CR_PAT }}
+  #   - name: Echo
+  #     run: |
+  #       echo 'Creating push request'
+  #       echo "Version number: ${{needs.build.outputs.new-tag}}"
+  #   - name: Creating push request
+  #     run: |
+  #       git config user.name kaikiat
+  #       git config user.email pohkaikiat98@gmail.com
+  #       export dt=$(date +"%s")
+  #       git pull
+  #       git checkout -b ${dt}
+  #       sed -i "/  tag: ./c\  tag: ${{ needs.build.outputs.new-tag }}" blue_green/sgdecoding-online-scaled/values.yaml
+  #       git add .
+  #       git commit -m "Version bump to ${{ needs.build.outputs.new-tag }}"
+  #       git push origin ${dt}
